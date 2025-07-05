@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart GAS Monitoring</title>
+    <style>
+      :root {
+        --bg-light: #f4f6f8;
+        --bg-section: #ffffff;
+        --primary: #1abc9c;
+        --primary-dark: #16a085;
+        --accent: #3498db;
+        --accent-dark: #2980b9;
+        --text-dark: #2c3e50;
+        --input-bg: #f9f9f9;
+        --input-border: #ccc;
+        --input-focus: #1abc9c;
+      }
+
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        background: var(--bg-light);
+        color: var(--text-dark);
+      }
+
+      header {
+        background: var(--text-dark);
+        color: white;
+        padding: 1.2rem;
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+
+      nav {
+        display: flex;
+        background: var(--primary-dark);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      nav button {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        background: var(--primary-dark);
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      nav button.active {
+        background: var(--primary);
+        font-weight: bold;
+      }
+
+      nav button:hover {
+        background: var(--primary);
+      }
+
+      .tab-content {
+        display: none;
+        padding: 2rem 1.5rem;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @media (max-width: 600px) {
+        nav {
+          flex-direction: column;
+        }
+
+        nav button {
+          width: 100%;
+          text-align: left;
+          padding: 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav button:last-child {
+          border-bottom: none;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section {
+        background: var(--bg-section);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .section h3 {
+        margin-top: 0;
+        border-left: 5px solid var(--primary);
+        padding-left: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      input,
+      select,
+      textarea {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--input-focus);
+        outline: none;
+        box-shadow: 0 0 5px rgba(26, 188, 156, 0.4);
+      }
+
+      button.action {
+        background: var(--accent);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 8px;
+        margin-right: 0.5rem;
+        margin-top: 0.3rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button.action:hover {
+        background: var(--accent-dark);
+      }
+
+      .ota-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .file-label {
+        background-color: #e0e0e0;
+        color: #333;
+        padding: 10px;
+        text-align: center;
+        border: 2px dashed #aaa;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .file-label:hover {
+        background-color: #ccc;
+      }
+
+      /* Gaya umum tombol */
+      .action {
+        background-color: #4caf50;
+        border: none;
+        padding: 10px 16px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+        border-radius: 6px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .action:hover {
+        background-color: #45a049;
+      }
+
+      /* Spasi antar tombol dan tabel */
+      .button-group {
+        margin-bottom: 15px;
+      }
+
+      /* Tabel */
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <header>SMART METER GAS CONTROL MONITORING SYSTEM</header>
+
+    <nav>
+      <button class="active" onclick="openTab(event, 'monitoring')">Monitoring</button>
+      <button onclick="openTab(event, 'config')">Configuration</button>
+      <button onclick="openTab(event, 'network')">Network</button>
+      <button onclick="openTab(event, 'security')">Security</button>
+      <button onclick="openTab(event, 'logs')">Log & Data</button>
+      <button onclick="openTab(event, 'system')">Update Firmware</button>
+    </nav>
+
+    <main>
+      <!-- Monitoring -->
+      <section id="monitoring" class="tab-content active">
+        <div class="section">
+          <h3>Status Monitoring</h3>
+          <p>Meter Reading: <span id="meter_reading">--</span> m³</p>
+          <p>Remaining Gas: <span id="remaining_volume">--</span> m³</p>
+          <p>Real-time Flow Rate: <span id="flow_rate">--</span> m³/h</p>
+          <p>Hourly Usage: <span id="usage_hour">--</span> m³</p>
+          <p>Today's Usage: <span id="usage_today">--</span> m³</p>
+          <hr />
+          <p>Battery Voltage: <span id="battery_voltage">--</span> V</p>
+          <p>Battery Percent: <span id="battery_percent">--</span> %</p>
+          <p>Board Temp: <span id="board_temp">--</span> °C</p>
+          <hr />
+          <p>Board Version: <span id="board_ver">--</span></p>
+          <p>Firmware Version: <span id="firm_ver">--</span></p>
+          <p>Serial Number: <span id="sn">--</span></p>
+          <p>Assembly Date: <span id="assembly_date">--</span></p>
+          <p>Date Time: <span id="date_time">--</span></p>
+          <p>Last Update: <span id="last_update">--</span></p>
+          <hr />
+          <div class="section">
+            <h3>Kontrol Perangkat</h3>
+            <button class="action" onclick="restartDevice()">Restart</button>
+            <button class="action" onclick="refreshData()">Refresh</button>
+            <button class="action" onclick="logout()">Logout</button>
+            <button class="action" onclick="reset_default()">Reset Default</button>
+          </div>
+
+          <div class="section">
+            <h3>Start Selenoid Valve</h3>
+            <label for="start_selenoid_valve">Code:</label>
+            <input type="number" id="start_code" placeholder="Enter Code" />
+            <button class="action" onclick="start_code()">ON</button>
+            <button class="action" onclick="off_code()">OFF</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Konfigurasi -->
+      <section id="config" class="tab-content">
+        <div class="section">
+          <h3>Meter Reading Calibration (dm<sup>3</sup>)</h3>
+          <input type="number" id="meter" value="~meter~" />
+          <button class="action" onclick="send_meter()">Save</button>
+        </div>
+        <div class="section">
+          <h3>Remaining GAS Calibration (dm<sup>3</sup>)</h3>
+          <input type="number" id="remaining" value="~remaining~" />
+          <button class="action" onclick="send_remaining()">Save</button>
+        </div>
+        <div class="section">
+          <h3>Remaining Gas Alarm Threshold (dm<sup>3</sup>)</h3>
+          <label for="alarm_threshold_enable">Status:</label>
+          <select id="alarm_threshold">
+            <option value="enable" ~selected_enable_alarm~>Enable</option>
+            <option value="disable" ~selected_disable_alarm~>Disable</option>
+          </select>
+          <input type="number" id="alarm_threshold_min" value="~alarm_threshold_min~" />
+          <button class="action" onclick="send_alaram_threshold()">Save</button>
+        </div>
+        <div class="section">
+          <h3>Remaining Gas Control Valve Threshold (dm<sup>3</sup>)</h3>
+          <label for="valve_threshold_enable">Status:</label>
+          <select id="valve_threshold_enable">
+            <option value="enable" ~selected_enable_valve~>Enable</option>
+            <option value="disable" ~selected_disable_valve~>Disable</option>
+          </select>
+          <input type="number" id="valve_threshold_min" value="~valve_threshold_min~" />
+          <button class="action" onclick="send_valve_threshold()">Save</button>
+        </div>
+        <div class="section">
+          <h3>Date & Time</h3>
+          <label for="rtc_date">Date:</label>
+          <input type="date" id="set_date" value="~date~" /><br /><br />
+
+          <label for="rtc_time">Time:</label>
+          <input type="time" id="set_time" value="~time~" step="any" /><br /><br />
+
+          <button class="action" onclick="send_datetime()">Set Date & Time</button>
+        </div>
+      </section>
+
+      <!-- Jaringan -->
+      <section id="network" class="tab-content">
+        <div class="section">
+          <h3>Network Info:</h3>
+          <p>SSID: <span id="ssid">--</span></p>
+          <p>IP: <span id="ip">--</span></p>
+          <p>MAC: <span id="mac">--</span></p>
+          <p>Gateway: <span id="gateway">--</span></p>
+          <p>Subnet: <span id="subnet">--</span></p>
+          <p>RSSI: <span id="rssi">--</span> dBm</p>
+        </div>
+        <div class="section">
+          <h3>WiFi Station</h3>
+          <label for="wifi_client_enable">Status:</label>
+          <select id="wifi_client">
+            <option value="enable" ~selected_enable_client~>Enable</option>
+            <option value="disable" ~selected_disable_client~>Disable</option>
+          </select>
+          <input id="ssid_client" value="~ssid_client~" />
+          <input type="password" id="password_client" value="~password_client~" />
+          <button class="action" onclick="saveWifiClient()">Save</button>
+        </div>
+        <div class="section">
+          <h3>WiFi Access Point</h3>
+          <label for="wifi_ap_enable">Status:</label>
+          <select id="wifi_ap">
+            <option value="enable" ~selected_enable_ap~>Enable</option>
+            <option value="disable" ~selected_disable_ap~>Disable</option>
+          </select>
+          <input id="ssid_ap" value="~ssid_ap~" />
+          <input type="password" id="password_ap" value="~password_ap~" />
+          <button class="action" onclick="saveWifiAP()">Save</button>
+        </div>
+      </section>
+
+      <!-- Keamanan -->
+      <section id="security" class="tab-content">
+        <div class="section">
+          <h3>Auth Login Web Server</h3>
+          <input id="username" value="~username~" />
+          <input type="password" value="~password~" id="password" />
+          <button class="action" onclick="saveAuth()">Save</button>
+        </div>
+        <div class="section">
+          <h3>Kode Start Selenoid Valve</h3>
+          <input type="number" id="kode" placeholder="Enter Code" />
+          <button class="action" onclick="save_kode()">Save</button>
+        </div>
+      </section>
+
+      <!-- Log & Data -->
+      <section id="logs" class="tab-content">
+        <div class="section">
+          <h3>MCU Info</h3>
+          <p>Chip Model: <span id="chip_model">--</span></p>
+          <p>Chip Revision: <span id="chip_revision">--</span></p>
+          <p>Core Count: <span id="chip_cores">--</span></p>
+          <p>CPU Frequency: <span id="cpu_freq">--</span> MHz</p>
+          <p>Flash Size: <span id="flash_size">--</span> kB</p>
+          <p>Heap Free: <span id="heap_free">--</span> bytes</p>
+          <p>Min Free Heap: <span id="heap_min">--</span> bytes</p>
+          <p>Sketch Size: <span id="sketch_size">--</span> bytes</p>
+          <p>Free Sketch Space: <span id="sketch_free">--</span> bytes</p>
+        </div>
+
+        <div class="section">
+          <h3>Log History</h3>
+          <div class="button-group">
+            <button id="showLogBtn" class="action" onclick="requestLog()">Show Log</button>
+            <button id="downloadBtn" class="action" onclick="downloadCSV()" style="display: none">
+              Download CSV
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table id="logTable">
+              <thead>
+                <tr id="headerRow"></tr>
+              </thead>
+              <tbody id="logBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sistem -->
+      <section id="system" class="tab-content">
+        <div class="section">
+          <h3><i class="fas fa-upload"></i> OTA Local (Elegant OTA)</h3>
+          <p>Click the button below to open the firmware update page:</p>
+          <button class="action" onclick="window.location.href='/update'">
+            🚀 Open OTA Update
+          </button>
+        </div>
+
+        <div class="section">
+          <h3>OTA Public</h3>
+          <label for="ota_public">URL:</label>
+          <input type="text" id="url_ota" value="~url_ota~" />
+          <button class="action" onc {lick="ota_public()">Update</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      let websocket
+      const gateway = `ws://${window.location.hostname}/ws`
+
+      document.addEventListener('DOMContentLoaded', initWebSocket)
+
+      function initWebSocket() {
+        console.log('Trying to open a WebSocket connection…')
+        websocket = new WebSocket(gateway)
+
+        websocket.onopen = () => console.log('Connection opened')
+
+        websocket.onclose = () => {
+          console.warn('Connection closed, retrying in 2s...')
+          setTimeout(initWebSocket, 2000)
+        }
+
+        websocket.onerror = (error) => {
+          console.error('WebSocket error:', error)
+        }
+
+        websocket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data)
+            console.log('Data diterima:', data)
+            showDataOnElement(data)
+
+            const hasLogHeader = data.hasOwnProperty('log_header')
+            const hasAtLeastOneLog = Object.keys(data).some((key) => /^log\d+$/.test(key))
+
+            if (hasLogHeader && hasAtLeastOneLog) {
+              localStorage.setItem('data', event.data)
+              showDataElement(data)
+              document.getElementById('downloadBtn').style.display = 'inline-block'
+            }
+          } catch (err) {
+            console.error('Invalid JSON received:', err)
+          }
+        }
+      }
+
+      function showDataOnElement(data) {
+        Object.keys(data).forEach((key) => {
+          const el = document.getElementById(key)
+          if (el) el.innerHTML = data[key]
+
+          if (key === 'selenoid_start_status') {
+            if (data[key].toLowerCase() === 'success') {
+              alert('✅ Success to start solenoid.')
+            } else if (data[key].toLowerCase() === 'failed') {
+              alert('❌ Failed to start solenoid: incorrect code.')
+            }
+          }
+
+          if (key === 'selenoid_stop_status') {
+            if (data[key].toLowerCase() === 'success') {
+              alert('✅ Success to stop solenoid.')
+            } else if (data[key].toLowerCase() === 'failed') {
+              alert('❌ Failed to stop solenoid: incorrect code.')
+            }
+          }
+        })
+      }
+
+      function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach((t) => t.classList.remove('active'))
+        document.querySelectorAll('nav button').forEach((b) => b.classList.remove('active'))
+        document.getElementById(tabName).classList.add('active')
+        evt.target.classList.add('active')
+      }
+
+      function sendFormData(fields) {
+        const formData = {}
+        fields.forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) formData[id] = el.value
+        })
+
+        const jsonString = JSON.stringify(formData, null, 2)
+        if (websocket.readyState === WebSocket.OPEN) {
+          websocket.send(jsonString)
+          console.log('Sent:', jsonString)
+        } else {
+          console.error('WebSocket not connected.')
+        }
+      }
+
+      function fileSelected() {
+        const file = document.getElementById('otaFile').files[0]
+        if (file) {
+          document.getElementById('fileLabel').textContent = '📁 ' + file.name
+        }
+      }
+
+      // Send button wrappers
+      function send_meter() {
+        alert('Send...!')
+        sendFormData(['meter'])
+      }
+
+      function send_remaining() {
+        alert('Send...!')
+        sendFormData(['remaining'])
+      }
+
+      function send_alaram_threshold() {
+        alert('Send...!')
+        sendFormData(['alarm_threshold', 'alarm_threshold_min'])
+      }
+
+      function send_valve_threshold() {
+        alert('Send...!')
+        sendFormData(['valve_threshold_enable', 'valve_threshold_min'])
+      }
+
+      function send_datetime() {
+        alert('Send...!')
+        sendFormData(['set_date', 'set_time'])
+      }
+
+      function saveWifiClient() {
+        alert('Send...!')
+        sendFormData(['wifi_client', 'ssid_client', 'password_client'])
+      }
+
+      function saveWifiAP() {
+        alert('Send...!')
+        sendFormData(['wifi_ap', 'ssid_ap', 'password_ap'])
+      }
+
+      function saveAuth() {
+        alert('Send...!')
+        sendFormData(['username', 'password'])
+      }
+
+      function save_kode() {
+        alert('Send...!')
+        sendFormData(['kode'])
+      }
+
+      function ota_public() {
+        if (confirm('Are you sure you want to trigger OTA update from the URL?')) {
+          sendFormData(['url_ota'])
+          alert('OTA update has been triggered.')
+        }
+      }
+
+      function start_code() {
+        alert('Start Selenoid_Valve...!')
+        sendFormData(['start_code'])
+      }
+
+      function off_code() {
+        alert('Stop Selenoid_Valve...!')
+
+        // Ambil nilai kode dari input dengan id="start_code"
+        const stopCodeValue = document.getElementById('start_code').value
+
+        // Buat objek JSON yang akan dikirim
+        const jsonData = {
+          stop_code: stopCodeValue,
+        }
+
+        // Kirim data melalui WebSocket
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+          websocket.send(JSON.stringify(jsonData))
+          console.log('Sent:', JSON.stringify(jsonData))
+        } else {
+          console.error('WebSocket not connected.')
+        }
+      }
+
+      function restartDevice() {
+        if (confirm('Are you sure you want to restart the device?')) {
+          websocket.send('restart')
+          alert('The device is restarting...')
+        }
+      }
+
+      function refreshData() {
+        if (confirm('Do you want to refresh the device data?')) {
+          location.reload() // Ini akan me-refresh seluruh halaman
+        }
+      }
+
+      function logout() {
+        if (confirm('Are you sure you want to log out?')) {
+          fetch('/logout')
+            .then((response) => {
+              if (response.status === 401) {
+                alert('You have been logged out.')
+                location.reload() // Refresh untuk trigger login prompt
+              } else {
+                alert('Logout failed.')
+              }
+            })
+            .catch((error) => {
+              console.error('Logout error:', error)
+              alert('Logout request failed.')
+            })
+        }
+      }
+
+      function reset_default() {
+        if (
+          confirm(
+            'Are you sure you want to reset all settings to default? This action cannot be undone.'
+          )
+        ) {
+          websocket.send('reset_default')
+          alert('The device has been reset to its default settings.')
+        }
+      }
+
+      function sendCommand(command) {
+        if (websocket.readyState === WebSocket.OPEN) {
+          websocket.send(JSON.stringify({ action: command }))
+          console.log('Command sent:', command)
+        } else {
+          console.error('WebSocket not connected.')
+        }
+      }
+
+      function showDataElement(data) {
+        const headerRow = document.getElementById('headerRow')
+        const logBody = document.getElementById('logBody')
+
+        headerRow.innerHTML = ''
+        logBody.innerHTML = ''
+
+        // Tampilkan header
+        if (data.log_header) {
+          const headers = data.log_header.split(',').map((h) => h.trim())
+          headers.forEach((h) => {
+            const th = document.createElement('th')
+            th.textContent = h
+            headerRow.appendChild(th)
+          })
+        }
+
+        // Tampilkan log: hanya log1 hingga log31
+        Object.keys(data).forEach((key) => {
+          if (/^log\d+$/.test(key)) {
+            const values = data[key].split(',').map((v) => v.trim())
+            const row = document.createElement('tr')
+            values.forEach((val) => {
+              const td = document.createElement('td')
+              td.textContent = val
+              row.appendChild(td)
+            })
+            logBody.appendChild(row)
+          }
+        })
+      }
+
+      function requestLog() {
+        websocket.send('show_log')
+      }
+
+      function downloadCSV() {
+        const rawData = localStorage.getItem('data')
+        if (!rawData) {
+          alert('Tidak ada data untuk diunduh.')
+          return
+        }
+
+        let data
+        try {
+          data = JSON.parse(rawData)
+        } catch (err) {
+          alert('Data tidak valid.')
+          return
+        }
+
+        if (!data.log_header) {
+          alert('log_header tidak ditemukan.')
+          return
+        }
+
+        const headers = data.log_header.split(',').map((h) => h.trim())
+        let csv = headers.join(',') + '\n'
+
+        Object.keys(data).forEach((key) => {
+          if (/^log\d+$/.test(key)) {
+            csv += data[key] + '\n'
+          }
+        })
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        const now = new Date().toISOString().split('T')[0]
+        link.setAttribute('href', url)
+        link.setAttribute('download', `log_${now}.csv`)
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    </script>
+  </body>
+</html>
